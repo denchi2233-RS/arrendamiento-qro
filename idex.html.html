@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil de Arrendatario · Cuestionario</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --warm-white: #FDFAF5;
+    --ink: #1A1612;
+    --muted: #6B6259;
+    --accent: #C8863A;
+    --accent-light: #E8C98A;
+    --accent-pale: #F5E9D3;
+    --border: #D9CFC2;
+    --success: #4A7C59;
+    --error: #C0392B;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; line-height: 1.6; }
+
+  .progress-bar-wrap { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--border); z-index: 100; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); width: 0%; transition: width 0.4s ease; }
+
+  header { background: var(--ink); color: var(--cream); padding: 48px 40px 40px; position: relative; overflow: hidden; }
+  header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; border-radius: 50%; border: 1px solid rgba(200,134,58,0.2); }
+  header::after { content: ''; position: absolute; bottom: -80px; right: 40px; width: 180px; height: 180px; border-radius: 50%; border: 1px solid rgba(200,134,58,0.15); }
+  .header-inner { max-width: 760px; margin: 0 auto; position: relative; }
+  .header-tag { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 16px; display: block; }
+  header h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 42px); font-weight: 400; line-height: 1.2; margin-bottom: 16px; color: var(--warm-white); }
+  header h1 em { font-style: italic; color: var(--accent-light); }
+  header p { font-size: 15px; color: rgba(245,240,232,0.7); font-weight: 300; max-width: 520px; }
+
+  .stepper { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0 40px; overflow-x: auto; }
+  .stepper-inner { max-width: 760px; margin: 0 auto; display: flex; }
+  .step-tab { padding: 16px 20px; font-size: 12px; font-weight: 500; letter-spacing: 0.06em; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; gap: 8px; user-select: none; }
+  .step-tab .step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--border); color: var(--muted); font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; }
+  .step-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .step-tab.active .step-num { background: var(--accent); color: white; }
+  .step-tab.done .step-num { background: var(--success); color: white; }
+  .step-tab.done .step-num::after { content: '✓'; }
+  .step-tab.done .step-label { display: none; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 40px 40px 80px; }
+
+  .section { display: none; animation: fadeUp 0.35s ease forwards; }
+  .section.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+  .section-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 32px; font-weight: 300; }
+
+  .q-group { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 28px 28px 20px; margin-bottom: 20px; transition: box-shadow 0.2s; }
+  .q-group:focus-within { box-shadow: 0 0 0 3px var(--accent-pale); border-color: var(--accent); }
+
+  label { display: block; font-size: 13.5px; font-weight: 500; margin-bottom: 8px; color: var(--ink); }
+  label .req { color: var(--accent); margin-left: 3px; }
+  .hint { font-size: 12px; color: var(--muted); font-weight: 300; margin-bottom: 10px; display: block; }
+
+  input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+    background: var(--cream); border: 1px solid var(--border); border-radius: 8px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-pale); background: white; }
+  textarea { resize: vertical; min-height: 90px; }
+  .select-wrap { position: relative; }
+  .select-wrap::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 12px; }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .option-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .option-card input { display: none; }
+  .option-card label { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13.5px; font-weight: 400; color: var(--ink); transition: all 0.18s; margin: 0; }
+  .option-card label::before { content: ''; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; transition: all 0.18s; }
+  .option-card.checkbox label::before { border-radius: 4px; }
+  .option-card input:checked + label { border-color: var(--accent); background: var(--accent-pale); }
+  .option-card input:checked + label::before { background: var(--accent); border-color: var(--accent); }
+
+  .range-wrap { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+  input[type="range"] { -webkit-appearance: none; flex: 1; height: 4px; border-radius: 2px; background: var(--border); outline: none; padding: 0; cursor: pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 2px 6px rgba(200,134,58,0.4); }
+  .range-val { font-size: 14px; font-weight: 500; color: var(--accent); min-width: 90px; text-align: right; }
+
+  .star-group { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 6px; }
+  .star-group input { display: none; }
+  .star-group label { font-size: 26px; cursor: pointer; color: var(--border); transition: color 0.15s; margin: 0; line-height: 1; padding: 2px; }
+  .star-group input:checked ~ label, .star-group label:hover, .star-group label:hover ~ label { color: var(--accent); }
+
+  .q-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--border); }
+  .btn { padding: 13px 28px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--ink); }
+  .btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 14px rgba(200,134,58,0.35); }
+  .btn-primary:hover { background: #b37530; box-shadow: 0 6px 20px rgba(200,134,58,0.45); transform: translateY(-1px); }
+  .btn-success { background: var(--success); color: white; box-shadow: 0 4px 14px rgba(74,124,89,0.35); }
+  .btn-success:hover { background: #3d6849; transform: translateY(-1px); }
+  .step-info { font-size: 12px; color: var(--muted); }
+
+  .conditional { display: none; }
+  .conditional.show { display: block; }
+  .conditional-inner { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+
+  .field-error { font-size: 11.5px; color: var(--error); margin-top: 5px; display: none; }
+  .field-wrap.invalid input, .field-wrap.invalid select, .field-wrap.invalid textarea { border-color: var(--error); }
+  .field-wrap.invalid .field-error { display: block; }
+
+  /* ── THANK YOU / CÓDIGO ── */
+  #thankyou { display: none; padding: 48px 0; animation: fadeUp 0.5s ease forwards; }
+  .ty-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; padding: 36px; text-align: center; margin-bottom: 24px; }
+  .ty-icon { font-size: 52px; margin-bottom: 16px; }
+  .ty-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; margin-bottom: 10px; }
+  .ty-sub { font-size: 14px; color: var(--muted); font-weight: 300; max-width: 420px; margin: 0 auto; line-height: 1.7; }
+
+  .code-card { background: var(--ink); border-radius: 16px; padding: 28px; margin-bottom: 20px; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .code-title { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--accent-light); }
+  .code-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .code-step { display: flex; align-items: flex-start; gap: 12px; color: rgba(245,240,232,0.75); font-size: 13.5px; font-weight: 300; line-height: 1.5; }
+  .code-step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+  .code-box-wrap { position: relative; }
+  #import-code {
+    width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(200,134,58,0.35);
+    color: #E8C98A; font-family: 'Courier New', monospace; font-size: 12px;
+    padding: 14px 16px; border-radius: 10px; resize: none; height: 90px;
+    outline: none; line-height: 1.5; letter-spacing: 0.02em;
+  }
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--accent); color: white; border: none;
+    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--accent-light); color: var(--ink); }
+  .copy-btn.copied { background: var(--success); }
+
+  .whatsapp-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #25D366; color: white; border: none;
+    padding: 14px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+    text-decoration: none; width: 100%; justify-content: center; margin-bottom: 10px;
+  }
+  .whatsapp-btn:hover { background: #1ebe5c; transform: translateY(-1px); }
+
+  @media (max-width: 560px) {
+    .input-row { grid-template-columns: 1fr; }
+    main { padding: 24px 16px 60px; }
+    header { padding: 36px 20px 32px; }
+    .stepper { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+
+<header>
+  <div class="header-inner">
+    <span class="header-tag">Proceso de Arrendamiento · Querétaro</span>
+    <h1>Cuestionario de <em>Perfil</em><br>para Posible Arrendatario</h1>
+    <p>Completa este formulario para que podamos conocer tus necesidades y verificar que el inmueble se ajusta a tu perfil. Tarda aprox. 5 minutos.</p>
+  </div>
+</header>
+
+<nav class="stepper">
+  <div class="stepper-inner">
+    <div class="step-tab active"><span class="step-num">1</span><span class="step-label">Datos personales</span></div>
+    <div class="step-tab"><span class="step-num">2</span><span class="step-label">Necesidades</span></div>
+    <div class="step-tab"><span class="step-num">3</span><span class="step-label">Situación laboral</span></div>
+    <div class="step-tab"><span class="step-num">4</span><span class="step-label">Aval y garantías</span></div>
+    <div class="step-tab"><span class="step-num">5</span><span class="step-label">Historial y hábitos</span></div>
+    <div class="step-tab"><span class="step-num">6</span><span class="step-label">Enviar</span></div>
+  </div>
+</nav>
+
+<main>
+
+<!-- S1: DATOS PERSONALES -->
+<div class="section active" id="s0">
+  <p class="section-title">Datos personales</p>
+  <p class="section-subtitle">Información básica de contacto e identificación.</p>
+  <div class="q-group">
+    <div class="input-row">
+      <div class="field-wrap" id="fw-nombre">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input type="text" id="nombre" placeholder="Ej. María González Reyes">
+        <span class="field-error">Este campo es obligatorio.</span>
+      </div>
+      <div class="field-wrap" id="fw-fecha_nac">
+        <label>Fecha de nacimiento <span class="req">*</span></label>
+        <input type="date" id="fecha_nac">
+        <span class="field-error">Este campo es obligatorio.</span>
+      </div>
+    </div>
+    <hr class="q-divider">
+    <div class="input-row">
+      <div class="field-wrap" id="fw-email">
+        <label>Correo electrónico <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="correo@ejemplo.com">
+        <span class="field-error">Ingresa un correo válido.</span>
+      </div>
+      <div class="field-wrap" id="fw-telefono">
+        <label>Teléfono / WhatsApp <span class="req">*</span></label>
+        <input type="tel" id="telefono" placeholder="442 000 0000">
+        <span class="field-error">Este campo es obligatorio.</span>
+      </div>
+    </div>
+    <hr class="q-divider">
+    <div class="field-wrap">
+      <label>¿Cuántas personas van a vivir en el inmueble?</label>
+      <span class="hint">Inclúyete a ti mismo/a</span>
+      <div class="range-wrap">
+        <input type="range" id="num_ocupantes" min="1" max="10" value="2" oninput="updateRange('num_ocupantes','lbl_ocupantes', v => v + (v==1?' persona':' personas'))">
+        <span class="range-val" id="lbl_ocupantes">2 personas</span>
+      </div>
+    </div>
+    <hr class="q-divider">
+    <label>Estado civil <span class="req">*</span></label>
+    <div class="option-grid cols-2">
+      <div class="option-card"><input type="radio" name="estado_civil" id="ec1" value="Soltero/a"><label for="ec1">Soltero/a</label></div>
+      <div class="option-card"><input type="radio" name="estado_civil" id="ec2" value="Casado/a"><label for="ec2">Casado/a</label></div>
+      <div class="option-card"><input type="radio" name="estado_civil" id="ec3" value="Unión libre"><label for="ec3">Unión libre</label></div>
+      <div class="option-card"><input type="radio" name="estado_civil" id="ec4" value="Divorciado/a"><label for="ec4">Divorciado/a</label></div>
+      <div class="option-card"><input type="radio" name="estado_civil" id="ec5" value="Viudo/a"><label for="ec5">Viudo/a</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Tienes mascotas?</label>
+    <div class="option-grid cols-2">
+      <div class="option-card"><input type="radio" name="mascotas" id="m1" value="No" onchange="toggleCond('mascotas-detail','m1')"><label for="m1">No tengo mascotas</label></div>
+      <div class="option-card"><input type="radio" name="mascotas" id="m2" value="Sí" onchange="toggleCond('mascotas-detail','m2')"><label for="m2">Sí tengo mascotas</label></div>
+    </div>
+    <div class="conditional" id="mascotas-detail">
+      <div class="conditional-inner">
+        <label>Describe tus mascotas</label>
+        <textarea id="desc_mascotas" placeholder="Ej. 1 perro golden retriever mediano, 1 gato doméstico..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <span></span>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="step-info">Paso 1 de 6</span>
+      <button class="btn btn-primary" onclick="nextSection(0)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- S2: NECESIDADES -->
+<div class="section" id="s1">
+  <p class="section-title">Necesidades de vivienda</p>
+  <p class="section-subtitle">Cuéntanos qué estás buscando para encontrar el inmueble ideal.</p>
+  <div class="q-group">
+    <label>Tipo de inmueble que buscas <span class="req">*</span></label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="tipo_inmueble" id="ti1" value="Casa"><label for="ti1">🏠 Casa</label></div>
+      <div class="option-card"><input type="radio" name="tipo_inmueble" id="ti2" value="Departamento"><label for="ti2">🏢 Departamento</label></div>
+      <div class="option-card"><input type="radio" name="tipo_inmueble" id="ti3" value="Local comercial"><label for="ti3">🏪 Local comercial</label></div>
+      <div class="option-card"><input type="radio" name="tipo_inmueble" id="ti4" value="Oficina"><label for="ti4">💼 Oficina</label></div>
+      <div class="option-card"><input type="radio" name="tipo_inmueble" id="ti5" value="Cuarto"><label for="ti5">🛏 Cuarto</label></div>
+      <div class="option-card"><input type="radio" name="tipo_inmueble" id="ti6" value="Otro"><label for="ti6">Otro</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Cuántas recámaras necesitas? <span class="req">*</span></label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="recamaras" id="r0" value="Estudio"><label for="r0">Estudio</label></div>
+      <div class="option-card"><input type="radio" name="recamaras" id="r1" value="1"><label for="r1">1 rec.</label></div>
+      <div class="option-card"><input type="radio" name="recamaras" id="r2" value="2"><label for="r2">2 rec.</label></div>
+      <div class="option-card"><input type="radio" name="recamaras" id="r3" value="3"><label for="r3">3 rec.</label></div>
+      <div class="option-card"><input type="radio" name="recamaras" id="r4" value="4+"><label for="r4">4+ rec.</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>Zonas / colonias de interés en Querétaro <span class="req">*</span></label>
+    <span class="hint">Puedes mencionar varias separadas por coma</span>
+    <input type="text" id="zonas" placeholder="Ej. El Refugio, Juriquilla, Centro Histórico, Zibatá…">
+    <hr class="q-divider">
+    <label>¿Cuándo necesitas mudarte?</label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="fecha_mudanza" id="fm1" value="Inmediato"><label for="fm1">Inmediato</label></div>
+      <div class="option-card"><input type="radio" name="fecha_mudanza" id="fm2" value="1 mes"><label for="fm2">En 1 mes</label></div>
+      <div class="option-card"><input type="radio" name="fecha_mudanza" id="fm3" value="2-3 meses"><label for="fm3">2–3 meses</label></div>
+      <div class="option-card"><input type="radio" name="fecha_mudanza" id="fm4" value="Más de 3 meses"><label for="fm4">Más de 3 meses</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Por cuánto tiempo planeas rentar?</label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="tiempo_renta" id="tr1" value="6 meses"><label for="tr1">6 meses</label></div>
+      <div class="option-card"><input type="radio" name="tiempo_renta" id="tr2" value="1 año"><label for="tr2">1 año</label></div>
+      <div class="option-card"><input type="radio" name="tiempo_renta" id="tr3" value="2 años"><label for="tr3">2 años</label></div>
+      <div class="option-card"><input type="radio" name="tiempo_renta" id="tr4" value="Indefinido"><label for="tr4">Indefinido</label></div>
+    </div>
+  </div>
+  <div class="q-group">
+    <label>Presupuesto mensual para renta</label>
+    <span class="hint">Rango aproximado en pesos mexicanos (MXN)</span>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div><label style="font-size:12px;color:var(--muted);margin-bottom:4px;">Mínimo</label><input type="number" id="ppto_min" placeholder="5,000" min="0" step="500"></div>
+      <div><label style="font-size:12px;color:var(--muted);margin-bottom:4px;">Máximo</label><input type="number" id="ppto_max" placeholder="15,000" min="0" step="500"></div>
+    </div>
+    <hr class="q-divider">
+    <label>Amenidades indispensables</label>
+    <div class="option-grid">
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a1" value="Estacionamiento"><label for="a1">Estacionamiento</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a2" value="Jardín"><label for="a2">Jardín</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a3" value="Alberca"><label for="a3">Alberca</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a4" value="Cuarto de servicio"><label for="a4">Cuarto de servicio</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a5" value="Seguridad 24h"><label for="a5">Seguridad 24h</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a6" value="Bodega"><label for="a6">Bodega</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a7" value="Amueblado"><label for="a7">Amueblado</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="amenidades" id="a8" value="Gas natural"><label for="a8">Gas natural</label></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-ghost" onclick="prevSection(1)">← Atrás</button>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="step-info">Paso 2 de 6</span>
+      <button class="btn btn-primary" onclick="nextSection(1)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- S3: SITUACIÓN LABORAL -->
+<div class="section" id="s2">
+  <p class="section-title">Situación laboral y económica</p>
+  <p class="section-subtitle">Esta información es confidencial y solo se usa para evaluar la viabilidad del arrendamiento.</p>
+  <div class="q-group">
+    <label>Situación laboral actual <span class="req">*</span></label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="sit_laboral" id="sl1" value="Empleado formal" onchange="showLaborDetail(this)"><label for="sl1">Empleado formal</label></div>
+      <div class="option-card"><input type="radio" name="sit_laboral" id="sl2" value="Empleado informal" onchange="showLaborDetail(this)"><label for="sl2">Empleado informal</label></div>
+      <div class="option-card"><input type="radio" name="sit_laboral" id="sl3" value="Independiente" onchange="showLaborDetail(this)"><label for="sl3">Independiente</label></div>
+      <div class="option-card"><input type="radio" name="sit_laboral" id="sl4" value="Empresario" onchange="showLaborDetail(this)"><label for="sl4">Empresario</label></div>
+      <div class="option-card"><input type="radio" name="sit_laboral" id="sl5" value="Jubilado" onchange="showLaborDetail(this)"><label for="sl5">Jubilado</label></div>
+      <div class="option-card"><input type="radio" name="sit_laboral" id="sl6" value="Estudiante" onchange="showLaborDetail(this)"><label for="sl6">Estudiante</label></div>
+    </div>
+    <div class="conditional" id="labor-empresa">
+      <div class="conditional-inner">
+        <div class="input-row">
+          <div><label>Empresa / negocio</label><input type="text" id="empresa" placeholder="Nombre de la empresa"></div>
+          <div><label>Puesto o actividad</label><input type="text" id="puesto" placeholder="Ej. Gerente"></div>
+        </div>
+        <div style="margin-top:14px;">
+          <label>Antigüedad</label>
+          <div class="select-wrap">
+            <select id="antiguedad">
+              <option value="">Selecciona...</option>
+              <option>Menos de 6 meses</option><option>6 meses – 1 año</option>
+              <option>1 – 2 años</option><option>2 – 5 años</option><option>Más de 5 años</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="q-group">
+    <label>Ingreso mensual neto (comprobable) <span class="req">*</span></label>
+    <span class="hint">El ingreso ideal es al menos 3× el monto de la renta</span>
+    <div class="select-wrap">
+      <select id="ingreso">
+        <option value="">Selecciona un rango...</option>
+        <option>Menos de $10,000</option><option>$10,000 – $15,000</option>
+        <option>$15,000 – $25,000</option><option>$25,000 – $40,000</option>
+        <option>$40,000 – $60,000</option><option>Más de $60,000</option>
+        <option>Prefiero no indicarlo</option>
+      </select>
+    </div>
+    <hr class="q-divider">
+    <label>Tipo de comprobante de ingresos disponible</label>
+    <div class="option-grid">
+      <div class="option-card checkbox"><input type="checkbox" name="comprobantes" id="ci1" value="Recibos de nómina"><label for="ci1">Recibos de nómina</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="comprobantes" id="ci2" value="Declaración SAT"><label for="ci2">Declaración SAT</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="comprobantes" id="ci3" value="Estados de cuenta"><label for="ci3">Estados de cuenta</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="comprobantes" id="ci4" value="Carta de empleo"><label for="ci4">Carta de empleo</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="comprobantes" id="ci5" value="Constancia fiscal"><label for="ci5">Constancia fiscal</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="comprobantes" id="ci6" value="Ninguno"><label for="ci6">Ninguno aún</label></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-ghost" onclick="prevSection(2)">← Atrás</button>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="step-info">Paso 3 de 6</span>
+      <button class="btn btn-primary" onclick="nextSection(2)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- S4: AVAL Y GARANTÍAS -->
+<div class="section" id="s3">
+  <p class="section-title">Aval y garantías</p>
+  <p class="section-subtitle">Esta sección es clave para procesar tu solicitud de arrendamiento.</p>
+  <div class="q-group">
+    <label>¿Cuentas con aval? <span class="req">*</span></label>
+    <div class="option-grid cols-2">
+      <div class="option-card"><input type="radio" name="tiene_aval" id="av1" value="qro" onchange="showAvalDetail(this)"><label for="av1">✅ Sí, con propiedad en Qro.</label></div>
+      <div class="option-card"><input type="radio" name="tiene_aval" id="av2" value="fuera" onchange="showAvalDetail(this)"><label for="av2">Sí, con propiedad fuera de Qro.</label></div>
+      <div class="option-card"><input type="radio" name="tiene_aval" id="av3" value="sin" onchange="showAvalDetail(this)"><label for="av3">Sí, sin propiedad registrada</label></div>
+      <div class="option-card"><input type="radio" name="tiene_aval" id="av4" value="no" onchange="showAvalDetail(this)"><label for="av4">No cuento con aval</label></div>
+    </div>
+    <div class="conditional" id="aval-detail">
+      <div class="conditional-inner">
+        <div class="input-row">
+          <div><label>Nombre completo del aval</label><input type="text" id="aval_nombre" placeholder="Nombre del aval"></div>
+          <div><label>Parentesco o relación</label><input type="text" id="aval_relacion" placeholder="Ej. Padre, amigo..."></div>
+        </div>
+        <div style="margin-top:14px;"><label>Teléfono del aval</label><input type="tel" id="aval_tel" placeholder="442 000 0000"></div>
+        <div id="aval-inmueble-block" style="margin-top:14px;display:none;">
+          <label>Ubicación del inmueble del aval</label>
+          <input type="text" id="aval_inmueble" placeholder="Ej. Col. Hércules, Querétaro · Casa propia escriturada">
+          <span class="hint" style="margin-top:6px;">Debe estar escriturado y libre de gravamen.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="q-group">
+    <label>¿Estarías dispuesto/a a otorgar garantía adicional?</label>
+    <div class="option-grid">
+      <div class="option-card checkbox"><input type="checkbox" name="garantias" id="g1" value="Depósito 1 mes"><label for="g1">Depósito 1 mes</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="garantias" id="g2" value="Depósito 2 meses"><label for="g2">Depósito 2 meses</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="garantias" id="g3" value="Póliza jurídica"><label for="g3">Póliza jurídica</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="garantias" id="g4" value="Seguro de caución"><label for="g4">Seguro de caución</label></div>
+      <div class="option-card checkbox"><input type="checkbox" name="garantias" id="g5" value="Domiciliación bancaria"><label for="g5">Domiciliación bancaria</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Tienes historial en buró de crédito?</label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="buro" id="b1" value="Sin adeudos"><label for="b1">Sí, sin adeudos</label></div>
+      <div class="option-card"><input type="radio" name="buro" id="b2" value="Con adeudos"><label for="b2">Con algunos adeudos</label></div>
+      <div class="option-card"><input type="radio" name="buro" id="b3" value="Sin historial"><label for="b3">Sin historial</label></div>
+      <div class="option-card"><input type="radio" name="buro" id="b4" value="Prefiero no indicar"><label for="b4">Prefiero no indicar</label></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-ghost" onclick="prevSection(3)">← Atrás</button>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="step-info">Paso 4 de 6</span>
+      <button class="btn btn-primary" onclick="nextSection(3)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- S5: HISTORIAL Y HÁBITOS -->
+<div class="section" id="s4">
+  <p class="section-title">Historial como inquilino y hábitos</p>
+  <p class="section-subtitle">Estas preguntas nos ayudan a entender tu experiencia previa.</p>
+  <div class="q-group">
+    <label>¿Has rentado antes?</label>
+    <div class="option-grid cols-2">
+      <div class="option-card"><input type="radio" name="rento_antes" id="ra1" value="No, primera vez" onchange="hideHistorial()"><label for="ra1">No, primera vez</label></div>
+      <div class="option-card"><input type="radio" name="rento_antes" id="ra2" value="Sí" onchange="toggleCond('historial-detail','ra2')"><label for="ra2">Sí, ya he rentado</label></div>
+    </div>
+    <div class="conditional" id="historial-detail">
+      <div class="conditional-inner">
+        <div class="input-row">
+          <div>
+            <label>Duración del último arrendamiento</label>
+            <div class="select-wrap"><select id="duracion_ant"><option value="">Selecciona...</option><option>Menos de 1 año</option><option>1 – 2 años</option><option>2 – 4 años</option><option>Más de 4 años</option></select></div>
+          </div>
+          <div>
+            <label>¿Terminaste satisfactoriamente?</label>
+            <div class="select-wrap"><select id="termino_ok"><option value="">Selecciona...</option><option>Sí, sin inconvenientes</option><option>Sí, con diferencias menores</option><option>No terminé el contrato</option></select></div>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <label>¿Puedes dar referencia de tu anterior arrendador?</label>
+          <div class="option-grid cols-2">
+            <div class="option-card"><input type="radio" name="ref_arr" id="ref1" value="Sí"><label for="ref1">Sí, con gusto</label></div>
+            <div class="option-card"><input type="radio" name="ref_arr" id="ref2" value="No"><label for="ref2">No</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Fumas dentro del inmueble?</label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="fuma" id="f1" value="No fumo"><label for="f1">No fumo</label></div>
+      <div class="option-card"><input type="radio" name="fuma" id="f2" value="Solo en exteriores"><label for="f2">Solo en exteriores</label></div>
+      <div class="option-card"><input type="radio" name="fuma" id="f3" value="Sí, dentro"><label for="f3">Sí, dentro</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Realizas actividades que generen ruido frecuente?</label>
+    <div class="option-grid cols-2">
+      <div class="option-card"><input type="radio" name="ruido" id="ru1" value="No"><label for="ru1">No</label></div>
+      <div class="option-card"><input type="radio" name="ruido" id="ru2" value="Ocasionalmente"><label for="ru2">Ocasionalmente</label></div>
+      <div class="option-card"><input type="radio" name="ruido" id="ru3" value="Con frecuencia"><label for="ru3">Con frecuencia</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Trabajas desde casa (home office)?</label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="homeoffice" id="ho1" value="No"><label for="ho1">No</label></div>
+      <div class="option-card"><input type="radio" name="homeoffice" id="ho2" value="Parcialmente"><label for="ho2">Parcialmente</label></div>
+      <div class="option-card"><input type="radio" name="homeoffice" id="ho3" value="Tiempo completo"><label for="ho3">Tiempo completo</label></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-ghost" onclick="prevSection(4)">← Atrás</button>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="step-info">Paso 5 de 6</span>
+      <button class="btn btn-primary" onclick="nextSection(4)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- S6: CIERRE -->
+<div class="section" id="s5">
+  <p class="section-title">Para finalizar</p>
+  <p class="section-subtitle">Últimas preguntas antes de enviar tu solicitud.</p>
+  <div class="q-group">
+    <label>¿Cómo te enteraste de esta propiedad?</label>
+    <div class="option-grid">
+      <div class="option-card"><input type="radio" name="fuente" id="fu1" value="Redes sociales"><label for="fu1">Redes sociales</label></div>
+      <div class="option-card"><input type="radio" name="fuente" id="fu2" value="Portal inmobiliario"><label for="fu2">Portal inmobiliario</label></div>
+      <div class="option-card"><input type="radio" name="fuente" id="fu3" value="Recomendación"><label for="fu3">Recomendación</label></div>
+      <div class="option-card"><input type="radio" name="fuente" id="fu4" value="Anuncio físico"><label for="fu4">Anuncio físico</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Ya visitaste el inmueble?</label>
+    <div class="option-grid cols-2">
+      <div class="option-card"><input type="radio" name="visitado" id="vi1" value="Sí, ya lo visité"><label for="vi1">Sí, ya lo visité</label></div>
+      <div class="option-card"><input type="radio" name="visitado" id="vi2" value="Me gustaría agendarlo"><label for="vi2">Me gustaría agendarlo</label></div>
+    </div>
+    <hr class="q-divider">
+    <label>¿Tienes alguna pregunta o comentario?</label>
+    <textarea id="comentarios" placeholder="Escribe aquí cualquier duda o información adicional…"></textarea>
+  </div>
+  <div class="q-group">
+    <label style="font-weight:600;">Declaración del solicitante</label>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:300;line-height:1.7;">Al enviar este formulario, declaro que la información proporcionada es verídica y completa. Entiendo que el arrendador podrá solicitar documentos que acrediten los datos aquí indicados.</p>
+    <div class="option-card checkbox" style="display:inline-flex;">
+      <input type="checkbox" id="acepta_terminos">
+      <label for="acepta_terminos" style="margin:0;">Acepto los términos y confirmo que la información es correcta <span class="req">*</span></label>
+    </div>
+    <span class="field-error" id="err-terminos" style="display:none;">Debes aceptar para continuar.</span>
+  </div>
+  <div class="nav">
+    <button class="btn btn-ghost" onclick="prevSection(5)">← Atrás</button>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="step-info">Paso 6 de 6</span>
+      <button class="btn btn-success" onclick="submitForm()">Enviar solicitud ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA FINAL CON CÓDIGO -->
+<div id="thankyou">
+  <div class="ty-card">
+    <div class="ty-icon">🏡</div>
+    <div class="ty-title">¡Listo! Tu solicitud está lista para enviarse</div>
+    <div class="ty-sub">Copia el código de abajo y mándalo por WhatsApp o correo a tu arrendador. Él lo importará al sistema en segundos.</div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header">
+      <span class="code-title">Tu código de candidato</span>
+    </div>
+    <div class="code-steps">
+      <div class="code-step"><div class="code-step-num">1</div><span>Copia el código de abajo con el botón "Copiar"</span></div>
+      <div class="code-step"><div class="code-step-num">2</div><span>Mándalo por WhatsApp o correo a tu arrendador junto con tu nombre</span></div>
+      <div class="code-step"><div class="code-step-num">3</div><span>El arrendador lo importa al dashboard y tus datos aparecen automáticamente</span></div>
+    </div>
+    <div class="code-box-wrap">
+      <textarea id="import-code" readonly></textarea>
+      <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copiar</button>
+    </div>
+  </div>
+
+  <a class="whatsapp-btn" id="whatsapp-link" href="#" target="_blank">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Enviar por WhatsApp
+  </a>
+</div>
+
+</main>
+
+<script>
+let currentSection = 0;
+const totalSections = 6;
+
+function updateProgress(idx) {
+  document.getElementById('progressFill').style.width = ((idx / totalSections) * 100) + '%';
+  document.querySelectorAll('.step-tab').forEach((tab, i) => {
+    tab.classList.remove('active','done');
+    if (i === idx) tab.classList.add('active');
+    if (i < idx) tab.classList.add('done');
+  });
+}
+function showSection(idx) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('s' + idx).classList.add('active');
+  currentSection = idx;
+  updateProgress(idx);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function nextSection(current) {
+  if (!validateSection(current)) return;
+  if (current < totalSections - 1) showSection(current + 1);
+}
+function prevSection(current) {
+  if (current > 0) showSection(current - 1);
+}
+
+function validateSection(idx) {
+  let ok = true;
+  const checks = {
+    0: [
+      { id: 'nombre', type: 'text' },
+      { id: 'email', type: 'email' },
+      { id: 'telefono', type: 'text' },
+    ],
+    1: [{ id: 'zonas', type: 'text' }],
+    2: [{ id: 'ingreso', type: 'select' }],
+  };
+  if (checks[idx]) {
+    checks[idx].forEach(f => {
+      const el = document.getElementById(f.id);
+      const fw = document.getElementById('fw-' + f.id);
+      if (!el) return;
+      let valid = el.value.trim() !== '';
+      if (f.type === 'email') valid = /\S+@\S+\.\S+/.test(el.value);
+      if (fw) fw.classList.toggle('invalid', !valid);
+      if (!valid) ok = false;
+    });
+  }
+  return ok;
+}
+
+/* CONDITIONAL FIELDS */
+function toggleCond(id, triggerId) {
+  const el = document.getElementById(id);
+  const trigger = document.getElementById(triggerId);
+  if (el) el.classList.toggle('show', trigger && trigger.checked);
+}
+function hideHistorial() { const el = document.getElementById('historial-detail'); if(el) el.classList.remove('show'); }
+function showLaborDetail(radio) {
+  const needs = ['Empleado formal','Empleado informal','Independiente','Empresario'];
+  const el = document.getElementById('labor-empresa');
+  if (el) el.classList.toggle('show', needs.includes(radio.value));
+}
+function showAvalDetail(radio) {
+  const detail = document.getElementById('aval-detail');
+  const inmBlock = document.getElementById('aval-inmueble-block');
+  if (detail) detail.classList.toggle('show', radio.value !== 'no');
+  if (inmBlock) inmBlock.style.display = ['qro','fuera'].includes(radio.value) ? 'block' : 'none';
+}
+
+function updateRange(inputId, labelId, formatter) {
+  const val = document.getElementById(inputId).value;
+  document.getElementById(labelId).textContent = formatter(parseInt(val));
+}
+
+/* ── COLLECT ALL DATA ── */
+function collectData() {
+  const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const radio = name => { const el = document.querySelector(`[name="${name}"]:checked`); return el ? el.value : ''; };
+  const checks = name => [...document.querySelectorAll(`[name="${name}"]:checked`)].map(e => e.value).join(', ');
+
+  return {
+    nombre: v('nombre'),
+    fecha_nac: v('fecha_nac'),
+    email: v('email'),
+    tel: v('telefono'),
+    ocupantes: v('num_ocupantes'),
+    estado_civil: radio('estado_civil'),
+    mascotas: radio('mascotas'),
+    desc_mascotas: v('desc_mascotas'),
+    tipo: radio('tipo_inmueble'),
+    recamaras: radio('recamaras'),
+    zonas: v('zonas'),
+    mudanza: radio('fecha_mudanza'),
+    tiempo: radio('tiempo_renta'),
+    pptoMin: v('ppto_min'),
+    pptoMax: v('ppto_max'),
+    amenidades: checks('amenidades'),
+    laboral: radio('sit_laboral'),
+    empresa: v('empresa'),
+    puesto: v('puesto'),
+    antiguedad: v('antiguedad'),
+    ingreso: v('ingreso'),
+    comprobante: checks('comprobantes'),
+    aval: radio('tiene_aval'),
+    avalNombre: v('aval_nombre'),
+    avalRelacion: v('aval_relacion'),
+    avalTel: v('aval_tel'),
+    avalInmueble: v('aval_inmueble'),
+    garantia: checks('garantias'),
+    buro: radio('buro'),
+    historial: radio('rento_antes'),
+    duracion_ant: v('duracion_ant'),
+    termino_ok: v('termino_ok'),
+    ref_arr: radio('ref_arr'),
+    fuma: radio('fuma'),
+    ruido: radio('ruido'),
+    homeoffice: radio('homeoffice'),
+    fuente: radio('fuente'),
+    visitado: radio('visitado'),
+    comentarios: v('comentarios'),
+    status: 'Nuevo',
+    fecha: new Date().toISOString().split('T')[0],
+  };
+}
+
+/* ── SUBMIT ── */
+function submitForm() {
+  const terms = document.getElementById('acepta_terminos');
+  const errEl = document.getElementById('err-terminos');
+  if (!terms.checked) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  const data = collectData();
+  // Generate unique ID
+  data.id = 'Q' + Date.now().toString(36).toUpperCase();
+
+  // Encode as compact base64 string prefixed with AQRO: so dashboard recognizes it
+  const json = JSON.stringify(data);
+  const code = 'AQRO:' + btoa(unescape(encodeURIComponent(json)));
+
+  document.getElementById('import-code').value = code;
+
+  // WhatsApp link
+  const msg = encodeURIComponent(
+    `Hola, aquí está mi perfil de arrendatario (${data.nombre}).\n\nCódigo de importación:\n${code}`
+  );
+  document.getElementById('whatsapp-link').href = `https://wa.me/?text=${msg}`;
+
+  // Hide form, show thank you
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById('thankyou').style.display = 'block';
+  document.getElementById('progressFill').style.width = '100%';
+  document.querySelectorAll('.step-tab').forEach(t => { t.classList.remove('active'); t.classList.add('done'); });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function copyCode() {
+  const ta = document.getElementById('import-code');
+  ta.select();
+  document.execCommand('copy');
+  const btn = document.getElementById('copy-btn');
+  btn.textContent = '✓ Copiado';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2500);
+}
+</script>
+</body>
+</html>
